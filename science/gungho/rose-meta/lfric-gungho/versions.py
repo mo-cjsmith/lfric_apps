@@ -124,3 +124,13 @@ class vn30_t135(MacroUpgrade):
         self.add_setting(config, ["namelist:cosp", "n_cosp_step"], "1")
 
         return config, self.reports
+
+class vn30_t218(MacroUpgrade):
+    """Upgrade macro for issue #218 by Chris Smith."""
+
+    BEFORE_TAG = "vn3.0_t135"
+    AFTER_TAG = "vn3.0_t218"
+
+    def upgrade(self, config, meta_config=None):
+        self.add_setting(config, ["namelist:formulation", "gravity_switch"], "'isotherm1'")
+        return config, self.reports
