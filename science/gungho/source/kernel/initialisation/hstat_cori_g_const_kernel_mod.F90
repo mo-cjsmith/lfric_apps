@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------------
-! (C) Crown copyright 2020 Met Office. All rights reserved.
+! (C) Crown copyright 2026 Met Office. All rights reserved.
 ! The file LICENCE, distributed with this code, contains details of the terms
 ! under which the code may be used.
 !-----------------------------------------------------------------------------
@@ -33,23 +33,24 @@ private
 !-------------------------------------------------------------------------------
 type, public, extends(kernel_type) :: hstat_cori_g_const_kernel_type
   private
-  type(arg_type) :: meta_args(12) = (/                      &
-       arg_type(GH_FIELD,   GH_REAL,    GH_WRITE, W3),      &
-       arg_type(GH_FIELD,   GH_REAL,    GH_READ,  W3),      &
-       arg_type(GH_FIELD,   GH_REAL,    GH_READ,  Wtheta),  &
-       arg_type(GH_FIELD,   GH_REAL,    GH_READ,  Wtheta),  &
-       arg_type(GH_FIELD*3, GH_REAL,    GH_READ,  Wtheta),  &
-       arg_type(GH_FIELD,   GH_REAL,    GH_READ,  W3),      &
-       arg_type(GH_FIELD,   GH_REAL,    GH_READ,  W3),      &
-       arg_type(GH_SCALAR,  GH_REAL,    GH_READ),           &
-       arg_type(GH_SCALAR,  GH_REAL,    GH_READ),           &
-       arg_type(GH_SCALAR,  GH_REAL,    GH_READ),           &
-       arg_type(GH_SCALAR,  GH_REAL,    GH_READ),           &
-       arg_type(GH_SCALAR,  GH_INTEGER, GH_READ)            &
+  type(arg_type) :: meta_args(13) = (/                    &
+       arg_type(GH_FIELD,  GH_REAL,    GH_WRITE, W3),     &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  W3),     &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  Wtheta), &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  Wtheta), &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  Wtheta), &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  Wtheta), &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  W3),     &
+       arg_type(GH_FIELD,  GH_REAL,    GH_READ,  W3),     &
+       arg_type(GH_SCALAR, GH_REAL,    GH_READ),          &
+       arg_type(GH_SCALAR, GH_REAL,    GH_READ),          &
+       arg_type(GH_SCALAR, GH_REAL,    GH_READ),          &
+       arg_type(GH_SCALAR, GH_REAL,    GH_READ),          &
+       arg_type(GH_SCALAR, GH_INTEGER, GH_READ)           &
        /)
-  type(func_type) :: meta_funcs(2) = (/                     &
-       func_type(W3,     GH_BASIS),                         &
-       func_type(Wtheta, GH_BASIS)                          &
+  type(func_type) :: meta_funcs(2) = (/ &
+       func_type(W3,     GH_BASIS),     &
+       func_type(Wtheta, GH_BASIS)      &
        /)
   integer :: operates_on = CELL_COLUMN
   integer :: gh_shape = GH_EVALUATOR
@@ -71,7 +72,6 @@ contains
 !! @param[in]  coriolis_term Vertical component of the coriolis term
 !! @param[in]  moist_dyn_gas Gas factor 1+ m_v/epsilon
 !! @param[in]  moist_dyn_tot Total mass factor 1 + sum m_x
-!! @param[in]  moist_dyn_fac Water factor
 !! @param[in]  height_w3     Height coordinate in w3
 !! @param[in]  w3_mask       LBC mask or Dummy mask for w3 space
 !! @param[in]  p_zero        Reference surface pressure
@@ -89,28 +89,27 @@ contains
 !! @param[in]  map_wt        Dofmap for the cell at column base for wt
 !! @param[in]  basis_wt      Basis functions evaluated at wt nodes
 subroutine hstat_cori_g_const_code( nlayers,       &
-                                      exner,         &
-                                      rho,           &
-                                      theta,         &
-                                      coriolis_term, &
-                                      moist_dyn_gas, &
-                                      moist_dyn_tot, &
-                                      moist_dyn_fac, &
-                                      height_w3,     &
-                                      w3_mask,       &
-                                      p_zero,        &
-                                      kappa,         &
-                                      rd,            &
-                                      cp,            &
-                                      eos_index,     &
-                                      ndf_w3,        &
-                                      undf_w3,       &
-                                      map_w3,        &
-                                      basis_w3,      &
-                                      ndf_wt,        &
-                                      undf_wt,       &
-                                      map_wt,        &
-                                      basis_wt )
+                                    exner,         &
+                                    rho,           &
+                                    theta,         &
+                                    coriolis_term, &
+                                    moist_dyn_gas, &
+                                    moist_dyn_tot, &
+                                    height_w3,     &
+                                    w3_mask,       &
+                                    p_zero,        &
+                                    kappa,         &
+                                    rd,            &
+                                    cp,            &
+                                    eos_index,     &
+                                    ndf_w3,        &
+                                    undf_w3,       &
+                                    map_w3,        &
+                                    basis_w3,      &
+                                    ndf_wt,        &
+                                    undf_wt,       &
+                                    map_wt,        &
+                                    basis_wt )
 
   implicit none
 
@@ -129,8 +128,7 @@ subroutine hstat_cori_g_const_code( nlayers,       &
                                                               height_w3,     &
                                                               w3_mask
   real(kind=r_def), dimension(undf_wt),         intent(in) :: moist_dyn_gas, &
-                                                              moist_dyn_tot, &
-                                                              moist_dyn_fac
+                                                              moist_dyn_tot
   real(kind=r_def), dimension(undf_wt),         intent(in) :: theta
   real(kind=r_def), dimension(undf_wt),         intent(in) :: coriolis_term
   real(kind=r_def), dimension(1,ndf_w3,ndf_w3), intent(in) :: basis_w3
@@ -188,22 +186,22 @@ subroutine hstat_cori_g_const_code( nlayers,       &
   do k = eos_index_m1, 1, -1
 
     dz = height_w3( map_w3(1) + k ) - height_w3( map_w3(1) + k - 1 )
-    theta_moist = moist_dyn_gas( map_wt(1) + k ) * theta( map_wt(1) + k ) /   &
+    theta_moist = moist_dyn_gas( map_wt(1) + k ) * theta( map_wt(1) + k ) / &
                   moist_dyn_tot( map_wt(1) + k )
-    exner( map_w3(1) + k - 1 ) = exner( map_w3 (1) + k )         &
-       +  ( gravity - coriolis_term( map_wt(1) + k ) ) * dz              &
-       / ( cp * theta_moist )
+    exner( map_w3(1) + k - 1 ) = exner( map_w3 (1) + k )                             &
+                                 + ( gravity - coriolis_term( map_wt(1) + k ) ) * dz &
+                                 / ( cp * theta_moist )
 
   end do
 
   do k = eos_index_m1, nlayers-2
 
     dz = height_w3( map_w3(1) + k + 1 ) - height_w3( map_w3(1) + k )
-    theta_moist = moist_dyn_gas( map_wt(1) + k + 1 ) * theta( map_wt(1) + k + 1) /   &
+    theta_moist = moist_dyn_gas( map_wt(1) + k + 1 ) * theta( map_wt(1) + k + 1) / &
                   moist_dyn_tot( map_wt(1) + k + 1)
-    exner( map_w3(1) + k + 1 ) = exner( map_w3 (1) + k )        &
-       -  ( gravity - coriolis_term( map_wt(1) + k + 1 ) ) * dz                 &
-       / ( cp * theta_moist )
+    exner( map_w3(1) + k + 1 ) = exner( map_w3 (1) + k )                                 &
+                                 - ( gravity - coriolis_term( map_wt(1) + k + 1 ) ) * dz &
+                                 / ( cp * theta_moist )
 
   end do
 
