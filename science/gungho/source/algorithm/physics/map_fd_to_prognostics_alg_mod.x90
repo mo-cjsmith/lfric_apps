@@ -118,10 +118,11 @@ contains
     type(integer_field_type), pointer :: face_selector_ns
 
     integer(i_def) :: model_eos_height
-    logical(l_def) :: read_w2h_wind
+    logical(l_def) :: read_w2h_wind, regrav_interp
 
     model_eos_height = config%initialization%model_eos_height()
     read_w2h_wind    = config%initialization%read_w2h_wind()
+    regrav_interp    = config%initialization%regrav_interp()
 
     ! FD (source) fields
     if ( read_w2h_wind ) then
@@ -353,8 +354,8 @@ contains
     use sci_enforce_bc_kernel_mod,     only : enforce_bc_kernel_type
     use hydrostatic_coriolis_kernel_mod, &
                                        only : hydrostatic_coriolis_kernel_type
-    use hydro_shallow_to_deep_kernel_mod, &
-                                       only : hydro_shallow_to_deep_kernel_type
+    use regrav_preserve_t_kernel_mod,  only : regrav_preserve_t_kernel_type
+    use regrav_geopot_kernel_mod,      only : regrav_geopot_kernel_type
     use moist_dyn_mod,                 only : num_moist_factors
     use matrix_vector_kernel_mod,      only : matrix_vector_kernel_type
     use sci_mass_matrix_solver_alg_mod, &
