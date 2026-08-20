@@ -381,6 +381,7 @@ contains
     type(field_type )              :: c_vert_term, r_c
     type(field_type )              :: exner_in_wth
     type(field_type )              :: temperature
+    type(field_type )              :: geopotential_g_const
     type(field_type),      pointer :: geopotential
     type(field_type),      pointer :: chi(:)
     type(field_type),      pointer :: panel_id
@@ -456,40 +457,53 @@ contains
       ! by rederiving potential temperature (theta) and density (rho).
       call theta%copy_field_properties(exner_in_wth)
       call theta%copy_field_properties(temperature)
+      call geopotential%copy_field_properties(geopotential_g_const)
+
       call invoke( &
-             ! Compute exner from EoS
-             sample_eos_pressure_kernel_type( exner, rho,                    &
-                                              theta, moist_dyn(gas_law) ),   &
-
-             ! Compute exner in Wtheta (required to calculate T)
-             sample_w3_to_wtheta_kernel_type( exner_in_wth, exner,           &
-                                              height_wth, height_w3 ),       &
-
+             a_times_X( geopotential_g_const, gravity, height_w3 ), &
+             ! Find exner at all layers beneath eos_level by integrating hydrostatic
+             ! equation downwards, assuming constant gravity
+             hydrostatic_coriolis_kernel_type( exner, rho, theta,               &
+                                               c_vert_term,                     &
+                                               moist_dyn, geopotential_g_const, &
+                                               height_w3, mask,                 &
+                                               p_zero, kappa,                   &
+                                               rd, cp,                          &
+                                               eos_level ),                     &
+             ! Find exner in Wtheta space
+             sample_w3_to_wtheta_kernel_type( exner_in_wth, exner,     &
+                                              height_wth, height_w3 ), &
              ! Compute absolute temperature T = theta * exner
-             X_times_Y( temperature, exner_in_wth, theta),                   &
+             X_times_Y( temperature, exner_in_wth, theta) )
 
-             ! Rebalance exner in vertical, using hydrostatic balance.
-             ! This integrates down using g (shallow) from eos_level and
-             ! then integrates up using phi (deep).
-             hydro_shallow_to_deep_kernel_type( exner, temperature,          &
-                                                c_vert_term,                 &
-                                                moist_dyn, geopotential,     &
-                                                height_w3, height_wth,       &
-                                                mask, gravity,               &
-                                                cp, eos_level ),             &
+      if ( regrav_interp ) then
+        call invoke( &
+             ! Interpolate temperature from heights corresponding to
+             ! geopotential height onto the model grid
+             regrav_geopot_kernel_type( temperature, height_wth, &
+                                        planet_radius ) )
+      end if
 
+      call invoke( &
+             ! Find exner at all levels by integrating hydrostatic
+             ! equation upwards from level 1, preserving absolute
+             ! temperature
+             regrav_preserve_t_kernel_type( exner, temperature,    &
+                                            c_vert_term,           &
+                                            moist_dyn(gas_law),    &
+                                            moist_dyn(total_mass), &
+                                            geopotential,          &
+                                            height_w3, height_wth, &
+                                            mask, cp ),            &
              ! Recompute exner in Wtheta (required to calculate theta)
-             sample_w3_to_wtheta_kernel_type( exner_in_wth, exner,           &
-                                              height_wth, height_w3 ),       &
-
+             sample_w3_to_wtheta_kernel_type( exner_in_wth, exner,     &
+                                              height_wth, height_w3 ), &
              ! Recompute potential temperature, theta = T /exner
-             X_divideby_Y( theta, temperature, exner_in_wth ),               &
-
+             X_divideby_Y( theta, temperature, exner_in_wth ), &
              ! Recompute density using the equation of state
-             sample_eos_rho_kernel_type(rho, exner, theta,                   &
-                                        moist_dyn(gas_law),                  &
-                                        kappa, rd, p_zero)                   &
-             )
+             sample_eos_rho_kernel_type(rho, exner, theta,  &
+                                        moist_dyn(gas_law), &
+                                        kappa, rd, p_zero) )
 
     end if
 
