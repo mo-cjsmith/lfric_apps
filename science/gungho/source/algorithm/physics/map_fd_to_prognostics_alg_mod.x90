@@ -50,7 +50,9 @@ module map_fd_to_prognostics_alg_mod
   use random_perturb_field_alg_mod,    only: random_perturb_field
   use mr_indices_mod,                  only: imr_v, imr_cl, imr_ci, imr_r, &
                                              imr_s, imr_g
-  use moist_dyn_mod,                   only: num_moist_factors, gas_law
+  use moist_dyn_mod,                   only: num_moist_factors, &
+                                             gas_law,           &
+                                             total_mass
   use moist_dyn_factors_alg_mod,       only: moist_dyn_factors_alg
 
   ! Object types
@@ -61,6 +63,7 @@ module map_fd_to_prognostics_alg_mod
                                        geometry_spherical, &
                                        topology,           &
                                        topology_fully_periodic
+  use extrusion_config_mod,      only: planet_radius
   use formulation_config_mod,    only: rotating, shallow
   use finite_element_config_mod, only: coord_system, coord_system_native
   use physics_config_mod,        only: sample_physics_winds, &
@@ -184,7 +187,7 @@ contains
     call invoke( sort_ref_kernel_type(theta) )
     ! Initialize hydrostatically balanced exner field
     call hydrostatic_balance( config, exner, rho, theta, u, moist_dyn, &
-                              model_eos_height )
+                              model_eos_height, regrav_interp )
 
     if ( perturb_init ) then
       call log_event( "Gungho: Applying initial perturbation to theta",         &
@@ -341,14 +344,19 @@ contains
   end subroutine set_wind
 
   !> @param[in]     config
-  !> @param[in,out] exner     Exner pressure
-  !> @param[in]     rho       Dry density
-  !> @param[in]     theta     Theta
-  !> @param[in]     u         Wind
-  !> @param[in]     moist_dyn Moisture arrays for dynamics
-  !> @param[in]     lbc_mask  Optional LBC mask
+  !> @param[in,out] exner         Exner pressure
+  !> @param[in]     rho           Dry density
+  !> @param[in]     theta         Theta
+  !> @param[in]     u             Wind
+  !> @param[in]     moist_dyn     Moisture arrays for dynamics
+  !> @param[in]     eos_height    Height at which equation of state is used
+  !>                              to diagnose exner for initialisation of
+  !>                              integration of hydrostatic balance quation
+  !> @param[in]     regrav_interp Switch for optional interpolation
+  !>                              stage
+  !> @param[in]     lbc_mask      Optional LBC mask
   subroutine hydrostatic_balance(config, exner, rho, theta, u, moist_dyn, &
-                                 eos_height, lbc_mask)
+                                 eos_height, regrav_interp, lbc_mask)
     use dg_inc_matrix_vector_kernel_mod, &
                                        only : dg_inc_matrix_vector_kernel_type
     use sci_enforce_bc_kernel_mod,     only : enforce_bc_kernel_type
@@ -366,7 +374,7 @@ contains
     use sci_sample_w3_to_wtheta_kernel_mod, &
                                        only : sample_w3_to_wtheta_kernel_type
     use sci_convert_cart2sphere_vector_kernel_mod, &
-                                        only: convert_cart2sphere_vector_kernel_type
+                                       only: convert_cart2sphere_vector_kernel_type
 
     implicit none
 
@@ -376,6 +384,7 @@ contains
     type( field_type ), intent( inout ) :: theta, rho, u
     type( field_type ), intent( in )    :: moist_dyn(num_moist_factors)
     integer(i_def),     intent( in )    :: eos_height
+    logical(l_def),     intent( in )    :: regrav_interp
     type( field_type ), intent( in ), optional, target :: lbc_mask
 
     type(field_type )              :: c_vert_term, r_c

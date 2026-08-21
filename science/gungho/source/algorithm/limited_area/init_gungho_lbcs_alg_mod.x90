@@ -397,6 +397,8 @@ module init_gungho_lbcs_alg_mod
 
     integer(i_def)            :: lbc_eos_height
 
+    logical(l_def)            :: regrav_interp
+
     character(len=str_def) :: prime_mesh_name
 
     nullify( lbc_rho_r2, lbc_rho, lbc_q, lbc_qcl, lbc_qcf, lbc_qrain,    &
@@ -405,6 +407,7 @@ module init_gungho_lbcs_alg_mod
 
     prime_mesh_name = config%base_mesh%prime_mesh_name()
     lbc_eos_height  = config%boundaries%lbc_eos_height()
+    regrav_interp   = config%initialization%regrav_interp()
 
     write(log_scratch_space,'(A)') &
       'Recovering exner, and mixing ratios for LBCs.'
@@ -467,7 +470,7 @@ module init_gungho_lbcs_alg_mod
 
     call hydrostatic_balance( config, lbc_exner, lbc_rho,      &
                               lbc_theta, lbc_u, lbc_moist_dyn, &
-                              lbc_eos_height, w3_lbc_mask )
+                              lbc_eos_height, regrav_interp, w3_lbc_mask )
 
     call log_field_masked_minmax( LOG_LEVEL_DEBUG, 'lbc_rho',   &
                                   lbc_rho, w3_lbc_mask )
