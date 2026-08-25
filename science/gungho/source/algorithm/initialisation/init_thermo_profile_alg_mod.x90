@@ -38,6 +38,7 @@ use initial_temperature_config_mod, only: temp_prof_size    => profile_size,    
                                           temp_prof_data    => profile_data,    &
                                           temp_prof_heights => profile_heights, &
                                           temp_variable => profile_variable,    &
+                                          profile_variable_potential,           &
                                           perturb, theta_pert_size,             &
                                           theta_pert_start, theta_pert_end,     &
                                           perturb_random
@@ -86,27 +87,16 @@ type( field_type ) :: vapour_specified
 call temp_specified%initialise( vector_space = theta%get_function_space() )
 call vapour_specified%initialise( vector_space = mr_v%get_function_space() )
 
-<<<<<<< HEAD
-mesh_id = theta%get_mesh_id()
-chi => get_coordinates(mesh_id)
-panel_id => get_panel_id(mesh_id)
-
-if ( theta%get_element_order_h() > 0 .or. theta%get_element_order_v() > 0 ) then
-  height_w3 => get_height_fe(W3, mesh_id)
-  height_wth => get_height_fe(Wtheta, mesh_id)
-else
-  height_wth => get_height_fv(Wtheta, mesh_id)
-  height_w3 => get_height_fv(W3, mesh_id)
-=======
 mesh     => theta%get_mesh()
 chi      => get_coordinates(mesh)
 panel_id => get_panel_id(mesh)
 
 if ( theta%get_element_order_h() > 0 .or. theta%get_element_order_v() > 0 ) then
   height_wth => get_height_fe(config, mesh, Wtheta)
+  height_w3  => get_height_fe(config, mesh, W3)
 else
   height_wth => get_height_fv(config, mesh, Wtheta)
->>>>>>> origin/stable
+  height_w3  => get_height_fv(config, mesh, W3)
 end if
 
 profile_extrap = .true.

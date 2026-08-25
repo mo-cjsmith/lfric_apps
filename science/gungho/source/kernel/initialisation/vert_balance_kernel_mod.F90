@@ -19,25 +19,31 @@ use argument_mod,           only: arg_type, func_type,       &
                                   ANY_DISCONTINUOUS_SPACE_3, &
                                   CELL_COLUMN, GH_EVALUATOR
 use constants_mod,          only: r_def, i_def
-use idealised_config_mod,   only: test
-use initial_temperature_config_mod, &
-                            only: temp_variable => profile_variable, &
-                                  profile_variable_absolute,         &
-                                  profile_variable_potential
-use initial_vapour_config_mod, &
-                            only: vapour_variable => profile_variable, &
-                                  profile_variable_mr,                 &
-                                  profile_variable_rh
+
 use kernel_mod,             only: kernel_type
-use extrusion_config_mod,   only: planet_radius
 use fs_continuity_mod,      only: Wtheta, W3
-use formulation_config_mod, only: shallow
-use planet_config_mod,      only: gravity, Rd, cp, p_zero, kappa, &
-                                  recip_epsilon
+
 use physics_common_mod,     only: qsaturation
 
 use log_mod,                only: log_event, log_scratch_space, &
                                   LOG_LEVEL_INFO, LOG_LEVEL_ERROR
+
+! Configuration modules
+use base_mesh_config_mod,      only: geometry, topology
+use extrusion_config_mod,      only: planet_radius
+use finite_element_config_mod, only: coord_system
+use formulation_config_mod,    only: shallow
+use idealised_config_mod,      only: test
+use initial_temperature_config_mod, &
+                               only: temp_variable => profile_variable, &
+                                     profile_variable_absolute,         &
+                                     profile_variable_potential
+use initial_vapour_config_mod, &
+                               only: vapour_variable => profile_variable, &
+                                     profile_variable_mr,                 &
+                                     profile_variable_rh
+use planet_config_mod,         only: gravity, Rd, cp, p_zero, kappa, &
+                                     recip_epsilon, scaled_radius
 
 implicit none
 
@@ -176,7 +182,10 @@ subroutine vert_balance_code( nlayers, theta, mr_v, exner,      &
     coords(3) = coords(3) + chi_3_e(dfc)*basis_chi_on_wt(1,dfc,wt_dof)
   end do
 
-  call chi2xyz(coords(1), coords(2), coords(3), ipanel, xyz(1), xyz(2), xyz(3))
+  call chi2xyz(coords(1), coords(2), coords(3), &
+               ipanel, geometry, topology,      &
+               coord_system, scaled_radius,     &
+               xyz(1), xyz(2), xyz(3))
 
   ! Exner at the model surface
   exner_itn(0) = analytic_pressure( xyz, test, 0.0_r_def)
