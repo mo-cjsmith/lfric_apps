@@ -22,6 +22,7 @@
                                                "transport",
                                                "solver",
                                                "linear",
+                                               "lfric_coupled",
                                                "jedi_lfric_interface",
                                                "coupled_interface",
                                                "adjoint",
@@ -87,7 +88,7 @@
 {% else %}
     {% do site_vars.update({"node_type": "milan"}) %}
     {% do site_vars.update({"node_cores": 128 }) %}
-    {% do site_vars.update({"node_mem": 237}) %}
+    {% do site_vars.update({"node_mem": 238}) %}
 {% endif %}
 
 {% do site_vars.update({"lfricinputs_kgo_base": "$UMDIR/standard_jobs/lfricinputs/kgo"}) %}

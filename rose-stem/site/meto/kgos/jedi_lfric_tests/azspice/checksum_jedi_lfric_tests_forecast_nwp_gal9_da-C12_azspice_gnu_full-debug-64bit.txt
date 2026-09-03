@@ -1,1 +1,0 @@
-Inner product checksum theta = 423278E13447DBC6
