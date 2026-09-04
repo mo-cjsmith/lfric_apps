@@ -17,14 +17,12 @@ select = ["E000", "C001", "C021", "C022", "C032", "C043",
 
 output-format = "grouped"                #group results by file
 
+[check.per-file-ignores]
 
-[check.per-file-ignores] #don't run these rules on these files:
-
-# shallow_water:
+"galewsky_test_case_mod.F90" = ["MOD021"]
 "analytic_geopot_profiles_mod_test.pf" = ["C081"]
 
 
 # Leaving out for now (these rules are used in the universal config):
 # E001, C121
-
 
