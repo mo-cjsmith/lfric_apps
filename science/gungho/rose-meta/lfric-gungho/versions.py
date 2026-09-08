@@ -18,16 +18,35 @@ class UpgradeError(Exception):
     __str__ = __repr__
 
 
-"""
-Copy this template and complete to add your macro
+class vn32_t763(MacroUpgrade):
+    """Upgrade macro for PR #763 by Chris Smith."""
 
-class vnXX_txxx(MacroUpgrade):
-    # Upgrade macro for <TICKET> by <Author>
-
-    BEFORE_TAG = "vnX.X"
-    AFTER_TAG = "vnX.X_txxx"
+    BEFORE_TAG = "vn3.2"
+    AFTER_TAG = "vn3.2_t763"
 
     def upgrade(self, config, meta_config=None):
-        # Add settings
+        """Add new wind_relax namelist"""
+        source = self.get_setting_value(
+            config, ["file:configuration.nml", "source"])
+        source = source + "\n" + " (namelist:wind_relax)"
+        self.change_setting_value(
+            config, ["file:configuration.nml", "source"], source)
+        """Add wind_relaxation setting to external_forcing namelist"""
+        self.add_setting(
+            config, ["namelist:external_forcing", "wind_relaxation"], ".false.")
+        """Data for wind_relax namelist"""
+        self.add_setting(config, ["namelist:wind_relax"])
+        self.add_setting(
+            config, ["namelist:wind_relax", "coordinate"], "'height'")
+        self.add_setting(config, ["namelist:wind_relax", "heights"], "0.0")
+        self.add_setting(
+            config, ["namelist:wind_relax", "number_heights"], "1")
+        self.add_setting(config, ["namelist:wind_relax", "number_times"], "1")
+        self.add_setting(config, ["namelist:wind_relax", "times"], "0.0")
+        self.add_setting(config, ["namelist:wind_relax", "timescale"], "1.0")
+        self.add_setting(
+            config, ["namelist:wind_relax", "u_profile_data"], "0.0")
+        self.add_setting(
+            config, ["namelist:wind_relax", "v_profile_data"], "0.0")
         return config, self.reports
 """
