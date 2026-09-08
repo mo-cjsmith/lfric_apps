@@ -187,7 +187,7 @@ contains
                  inc_X_minus_Y( dv_relax, v_relax_target ), &
                  inc_a_times_X( relaxation_coeff, dv_relax ) )
     ! Transform the relaxation increments back to w2 space
-    call set_wind( du_relaxation_forcing, du_relax, dv_relax, dw_relax)
+    call set_wind( config, du_relaxation_forcing, du_relax, dv_relax, dw_relax)
     ! Add relaxation increments to forcing
     call invoke( inc_X_plus_Y( du_forcing, du_relaxation_forcing ) )
 
@@ -232,7 +232,7 @@ contains
                  inc_X_minus_Y( dv_relax, v_relax_target ),       &
                  inc_a_times_X( relaxation_coeff, dv_relax ) )
     ! Transform the relaxation increments back to w2 space
-    call set_wind( du_relaxation_forcing, du_relax, dv_relax, dw_relax)
+    call set_wind( config, du_relaxation_forcing, du_relax, dv_relax, dw_relax)
     ! Add relaxation increments to forcing
     call invoke( inc_X_plus_Y( du_forcing, du_relaxation_forcing ) )
 
