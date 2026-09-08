@@ -17,6 +17,7 @@
 !>          the relaxation.
 module wind_relax_alg_mod
 
+  use config_mod,                    only: config_type
   use constants_mod,                 only: i_def, r_def, l_def
   use field_mod,                     only: field_type
   use fs_continuity_mod,             only: Wtheta, W3
@@ -42,13 +43,14 @@ module wind_relax_alg_mod
 contains
 
   !> @brief Algorithm to calculate Newtonian relaxation of horizontal wind
+  !> @param[in]     config     Application namelist configuration object
   !> @param[in,out] du_forcing Relaxation increment
-  !> @param[in]     u Horizontal wind field
-  !> @param[in]     exner pressure in original W3 space
-  !> @param[in]     twod_mesh Information  about the horizontal mesh
-  !> @param[in]     time_now Current model time in seconds
-  !> @param[in]     nlayers Number of layers in the grid
-  subroutine wind_relax_alg( du_forcing, u, exner, &
+  !> @param[in]     u          Horizontal wind field
+  !> @param[in]     exner      Exner in original W3 space
+  !> @param[in]     twod_mesh  Information  about the horizontal mesh
+  !> @param[in]     time_now   Current model time in seconds
+  !> @param[in]     nlayers    Number of layers in the grid
+  subroutine wind_relax_alg( config, du_forcing, u, exner, &
                              twod_mesh, time_now, nlayers )
 
   use wind_relax_config_mod, only:  number_times,                        &
@@ -65,6 +67,7 @@ contains
 
   implicit none
 
+  type( config_type ), intent(in)         :: config
   type( field_type ), intent(inout)       :: du_forcing
   type( field_type ), intent(in), target  :: u
   type( mesh_type ),  intent(in), pointer :: twod_mesh
@@ -77,7 +80,7 @@ contains
   real( kind=r_def )          :: u_wind_relax_now(number_heights)
   real( kind=r_def )          :: v_wind_relax_now(number_heights)
   real( kind=r_def )          :: relaxation_coeff
-  integer( kind=i_def )       :: k, mesh_id
+  integer( kind=i_def )       :: k
   logical( kind=l_def )       :: profile_extrap
 
   ! Horizontal winds may need to be assigned as relaxation targets
@@ -207,8 +210,8 @@ contains
       end do
       height_w3 => exner
     else
-      mesh_id = du_relax%get_mesh_id()
-      height_w3 => get_height_fv( W3, mesh_id )
+      mesh => du_relax%get_mesh()
+      height_w3 => get_height_fv( config, mesh, W3 )
     end if
     profile_extrap = .false.
     call invoke( setval_X( du_relax, u_relax_target),             &

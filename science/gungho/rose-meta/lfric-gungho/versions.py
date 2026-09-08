@@ -49,4 +49,3 @@ class vn32_t763(MacroUpgrade):
         self.add_setting(
             config, ["namelist:wind_relax", "v_profile_data"], "0.0")
         return config, self.reports
-"""
