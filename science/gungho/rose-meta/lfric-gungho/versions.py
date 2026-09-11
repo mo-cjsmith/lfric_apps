@@ -18,11 +18,11 @@ class UpgradeError(Exception):
     __str__ = __repr__
 
 
-class vn32_t618(MacroUpgrade):
-    """Upgrade macro for PR #618 by Chris Smith."""
+class vn32_t760(MacroUpgrade):
+    """Upgrade macro for PR #760 by Chris Smith."""
 
     BEFORE_TAG = "vn3.2"
-    AFTER_TAG = "vn3.2_t618"
+    AFTER_TAG = "vn3.2_t760"
 
     def upgrade(self, config, meta_config=None):
         self.add_setting(config, ["namelist:initial_temperature", "profile_variable"], "'potential'")

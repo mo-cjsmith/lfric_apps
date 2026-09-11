@@ -75,7 +75,7 @@ type(field_type), pointer :: chi(:) => null()
 type(field_type), pointer :: panel_id => null()
 
 type( field_type ), pointer :: height_wth => null()
-type( field_type ), pointer :: height_w3 => null()
+type( field_type ), pointer :: height_w3
 
 ! Temperature field specified by namelist input.
 ! This may be absolute temperature or potential temperature
